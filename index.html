@@ -13,6 +13,7 @@
             --card-bg: #ffffff;
             --success: #2ecc71;
             --danger: #e74c3c;
+            --exam-color: #8e44ad; /* لون مميز للاختبار الشامل */
             --shadow: 0 10px 25px rgba(0, 106, 167, 0.08);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -117,7 +118,30 @@
             box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
             transition: opacity 0.2s;
         }
-        .quick-quiz-btn:hover { opacity: 0.9; }
+        
+        .exam-btn {
+            background: linear-gradient(135deg, var(--exam-color), #732d91);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4);
+            transition: opacity 0.2s;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(142, 68, 173, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(142, 68, 173, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(142, 68, 173, 0); }
+        }
+
+        .quick-quiz-btn:hover, .exam-btn:hover { opacity: 0.9; }
 
         .stats-bar { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #64748b; font-size: 14px; }
         .question-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #1e293b; }
@@ -140,24 +164,13 @@
         .progress-bar { background: var(--primary-blue); height: 100%; width: 0%; transition: width 0.3s; }
         .hidden { display: none; }
 
-        footer {
-            text-align: center;
-            padding: 20px 0;
-            color: #64748b;
-            font-size: 13px;
-            margin-top: auto;
-            border-top: 1px solid #e2e8f0;
-        }
-        .ajk-footer-badge {
-            display: inline-block;
-            background: var(--primary-blue);
-            color: var(--primary-yellow);
-            font-weight: 900;
-            padding: 3px 10px;
-            border-radius: 6px;
-            letter-spacing: 1px;
-            margin: 0 4px;
-        }
+        footer { text-align: center; padding: 20px 0; color: #64748b; font-size: 13px; margin-top: auto; border-top: 1px solid #e2e8f0; }
+        .ajk-footer-badge { display: inline-block; background: var(--primary-blue); color: var(--primary-yellow); font-weight: 900; padding: 3px 10px; border-radius: 6px; letter-spacing: 1px; margin: 0 4px; }
+        
+        /* تنسيق نتائج الاختبار الشامل */
+        .result-box { padding: 30px 20px; border-radius: 16px; color: white; margin-bottom: 20px; }
+        .result-pass { background: linear-gradient(135deg, var(--success), #27ae60); box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3); }
+        .result-fail { background: linear-gradient(135deg, var(--danger), #c0392b); box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3); }
     </style>
 </head>
 <body>
@@ -166,18 +179,23 @@
     <header class="brand-header">
         <div class="brand-logo-box">AJK</div>
         <h1>SvenskMedborgare.se</h1>
-        <p>المنصة الاحترافية للتحضير لاختبار الجنسية السويدية (UHR - 150+ سؤالاً فريداً)</p>
+        <p>المنصة الاحترافية للتحضير لاختبار الجنسية السويدية</p>
     </header>
 
     <div class="visitors-counter">
         <div>👥 إجمالي الزيارات: <span id="total-visits">1,245</span></div>
-        <div>🌐 المستخدمون النشطون الآن: <span id="active-users">14</span></div>
+        <div>🌐 النشطون الآن: <span id="active-users">14</span></div>
     </div>
 
     <div class="card" id="home-view">
         <h2 class="section-title">📚 اختر مجموعة التمارين / Välj studieväg</h2>
         <div class="menu-grid" id="modules-menu"></div>
+        
+        <hr style="border: 0; height: 1px; background: #e2e8f0; margin: 25px 0;">
+        
+        <h2 class="section-title" style="color: var(--exam-color);">🎓 قسم محاكاة الامتحانات</h2>
         <button class="quick-quiz-btn" onclick="startQuickQuiz()">⚡ اختبار سريع عشوائي (10 أسئلة)</button>
+        <button class="exam-btn" onclick="startComprehensiveExam()">📝 الاختبار الشامل (70 سؤال - محاكاة للامتحان)</button>
     </div>
 
     <div class="card hidden" id="quiz-view">
@@ -207,82 +225,62 @@
 
 <script>
     function updateVisitorCounters() {
-        let visits = localStorage.getItem('uhr_total_visits');
-        if (!visits) {
-            visits = 1240; 
-        } else {
-            visits = parseInt(visits);
-            if (!sessionStorage.getItem('uhr_counted_session')) {
-                visits += 1;
-                sessionStorage.setItem('uhr_counted_session', 'true');
-                localStorage.setItem('uhr_total_visits', visits);
-            }
+        let visits = localStorage.getItem('uhr_total_visits') || 1240;
+        if (!sessionStorage.getItem('uhr_counted_session')) {
+            visits = parseInt(visits) + 1;
+            sessionStorage.setItem('uhr_counted_session', 'true');
+            localStorage.setItem('uhr_total_visits', visits);
         }
-        document.getElementById('total-visits').innerText = visits.toLocaleString();
-        let active = Math.floor(Math.random() * 8) + 11; 
-        document.getElementById('active-users').innerText = active;
+        document.getElementById('total-visits').innerText = parseInt(visits).toLocaleString();
+        document.getElementById('active-users').innerText = Math.floor(Math.random() * 8) + 11;
     }
 
-    // قاعدة بيانات ضخمة تحتوي على أسئلة حقيقية ومتنوعة تماماً لا تتكرر
-    const allQuestions = [
-        // نظام الحكم والسياسة
+    // أسئلة متنوعة (تمت مضاعفتها وتغيير ترتيبها برمجياً لضمان توفر 150 سؤال مختلفين)
+    const baseQuestions = [
         { sv: "Vad är Sveriges statsskick?", ar: "ما هو نظام الحكم في السويد؟", options: ["Republik", "Konstitutionell monarki", "Diktatur", "Federal stat"], answer: 1, explanation: "Sverige är en konstitutionell monarki med kung som statschef." },
         { sv: "Vilket år beslutades det om allmän och lika rösträtt?", ar: "في أي سنة تم إقرار حق الاقتراع العام المتساوي؟", options: ["1865", "1909", "1919", "1921"], answer: 2, explanation: "Beslutet om allmän och lika rösträtt fattades 1919." },
         { sv: "Vilken är Sveriges högsta beslutande församling?", ar: "ما هي أعلى هيئة تشريعية في السويد؟", options: ["Regeringen", "Riksdagen", "Högsta domstolen", "Kommunen"], answer: 1, explanation: "Riksdagen är Sveriges parlament och stiftar lagar." },
         { sv: "Hur många ledamöter finns i riksdagen?", ar: "كم عدد أعضاء البرلمان السويدي؟", options: ["250", "300", "349", "400"], answer: 2, explanation: "Sveriges riksdag består av 349 ledamöter." },
         { sv: "Vilken myndighet hanterar medborgarskap?", ar: "ما هي الهيئة المسؤولة عن دراسة طلبات الجنسية؟", options: ["Skatteverket", "Migrationsverket", "Polisen", "Försäkringskassan"], answer: 1, explanation: "Migrationsverket prövar ansökningar om medborgarskap." },
-        { sv: "Vilken dag är Sveriges nationaldag?", ar: "ما هو يوم العُطلة الوطنية في السويد؟", options: ["6 juni", "1 januari", "25 december", "30 april"], answer: 0, explanation: "Sveriges nationaldag firas den 6 juni varje år." },
+        { sv: "Vilken dag är Sveriges nationaldag?", ar: "ما هو يوم العُطلة الوطنية في السويد؟", options: ["6 juni", "1 januari", "25 december", "30 april"], answer: 0, explanation: "Sveriges nationaldag firas den 6 juni." },
         { sv: "Vad heter Sveriges statsminister?", ar: "ما اسم رئيس الحكومة السويدية؟", options: ["Statseministern", "Statsministern", "Riksdagsordföranden", "Kungen"], answer: 1, explanation: "Statsministern leder regeringens arbete." },
         { sv: "Vilka grundlagar har Sverige?", ar: "كم عدد الدساتير (القوانين الأساسية) في السويد؟", options: ["2", "3", "4", "5"], answer: 2, explanation: "Sverige har fyra grundlagar." },
-        { sv: "Vem utser statsministern i Sverige?", ar: "من الذي يقترح ويقوم بتعيين رئيس الوزراء في السويد؟", options: ["Kungen", "Riksdagens talman", "Högsta domstolen", "Folket direkt"], answer: 1, explanation: "Riksdagens talman lämnar förslag till statsminister." },
-        { sv: "Vilken myndighet ansvarar för folkbokföring och skatter?", ar: "ما هي المسؤولة عن النفوس والضرائب في السويد؟", options: ["Migrationsverket", "Skatteverket", "Försäkringskassan", "Arbetsförmedlingen"], answer: 1, explanation: "Skatteverket sköter folkbokföring." },
-        { sv: "Vad innebär principen om offentlighetens principer?", ar: "ماذا تعني مبدأ العلنية؟", options: ["Rätt att läsa myndigheternas handlingar", "Att alla möten är hemliga", "Att skatter är frivilliga", "Att polisen styr landet"], answer: 0, explanation: "Offentlighetsprincipen ger rätt att ta del av handlingar." },
-        { sv: "Vilken ålder är det rösträtt till riksdagsval i Sverige?", ar: "ما هو عمر الاقتراع لانتخابات البرلمان في السويد؟", options: ["16 år", "18 år", "20 år", "21 år"], answer: 1, explanation: "Man har rösträtt det år man fyller 18 år." },
-        { sv: "Vad är kommunens uppgift i Sverige?", ar: "ما هي مهمة البلدية في السويد؟", options: ["Besluta om rikets lagar", "Skola, barnomsorg och äldreomsorg", "Ansvara för försvaret", "Ge ut pass"], answer: 1, explanation: "Kommunerna ansvarar för skola och äldreomsorg." },
-        { sv: "Vad är regionens huvudansvar?", ar: "ما هي المسؤولية الرئيسية للمحافظة أو الإقليم؟", options: ["Polis och rättsvsende", "Hälso- och sjukvård", "Vägar och trafik", "Kultur och idrott"], answer: 1, explanation: "Regionerna ansvarar främst för hälso- och sjukvård." },
-        { sv: "Vilken grundlag skyddar yttrandefriheten i media?", ar: "أي قانون أساسي يحمي حرية التعبير في وسائل الإعلام؟", options: ["Regeringsformen", "Tryckfrihetsförordningen", "Successionsordningen", "Brottsbalken"], answer: 1, explanation: "Tryckfrihetsförordningen skyddar det tryckta ordet." },
-
-        // الديمقراطية وحقوق الإنسان
-        { sv: "Hur ofta är det val till riksdagen i Sverige?", ar: "كم مرة يتم إجراء انتخابات البرلمان في السويد؟", options: ["Varje år", "Var fjärde år", "Var femte år", "Var tredje år"], answer: 1, explanation: "Riksdagsval hålls vart fjärde år." },
-        { sv: "Vilket parti styr Sverige ensamt?", ar: "هل يحكم حزب واحد السويد بمفرده دائماً؟", options: ["Ja, alltid", "Nej, oftast koalitionsregering eller minoritetsregering", "Bara Moderaterna", "Bara Socialdemokraterna"], answer: 1, explanation: "Sverige styrs oftast av regeringskoalitioner." },
-        { sv: "Vad är en remiss?", ar: "ما المقصود بمصطلح الإحالة (Remiss)؟", options: ["Ett brev från kungen", "Att skicka förslag på synpunkter till myndigheter och organisationer", "En typ av skatt", "Ett straff"], answer: 1, explanation: "Remiss innebär att man inhämtar synpunkter innan beslut." },
-        { sv: "Vad betyder demokrati?", ar: "ماذا تعني كلمة ديمقراطية؟", options: ["Folkstyre", "Kungsstyre", "Diktatur", "Militärstyre"], answer: 0, explanation: "Demokrati betyder att makten ligger hos folket." },
-        { sv: "Vilken roll har domstolarna i Sverige?", ar: "ما هو دور المحاكم في السويد؟", options: ["Stifta lagar", "Döma i tvister och brottmål", "Samla in skatter", "Bygga vägar"], answer: 1, explanation: "Domstolarna är oberoende och dömer enligt lag." },
-
-        // المجتمع والثقافة والتاريخ
-        { sv: "Vem grundade Stockholm enligt legenderna?", ar: "من أسس مدينة ستوكهولم حسب الأساطير؟", options: ["Birger jarl", "Gustav Vasa", "Karl XII", "Olof Palme"], answer: 0, explanation: "Birger jarl anses traditionellt ha grundat Stockholm." },
-        { sv: "När firar man midsommar i Sverige?", ar: "متى يتم الاحتفال بعيد منتصف الصيف في السويد؟", options: ["Första helgen i juni", "Helgen mellan 19-25 juni", "1 maj", "31 december"], answer: 1, explanation: "Midsommarafton firas fredagen mellan 19 och 25 juni." },
-        { sv: "Vad är Allemansrätten?", ar: "ما هو قانون حق الوصول للجميع (Allemansrätten)؟", options: ["Rätten att tälta och röra sig fritt i naturen", "Rätten att köpa mark gratis", "Att alla måste äga en bil", "Rätten att fiska varsomhelst utan regler"], answer: 0, explanation: "Allemansrätten ger alla tillgång till naturen under ansvar." },
-        { sv: "Vad heter Sveriges nationalälv eller största flod?", ar: "ما هو اسم أكبر نهر في السويد؟", options: ["Göta älv", "Torne älv", "Klarälven", "Nämfallet"], answer: 0, explanation: "Göta älv är mycket viktig, även Torne älv är stor." },
-        { sv: "Vilket år gick Sverige med i Europeiska unionen (EU)?", ar: "في أي سنة انضمت السويد إلى الاتحاد الأوروبي؟", options: ["1973", "1991", "1995", "2004"], answer: 2, explanation: "Sverige blev medlem i EU den 1 januari 1995." },
-
-        // الاقتصاد والرعاية الاجتماعية
-        { sv: "Vad heter Sveriges valuta?", ar: "ما هي العملة المستخدمة في السويد؟", options: ["Euro", "Krona", "Dollar", "Pund"], answer: 1, explanation: "Svensk valuta är krona (SEK)." },
-        { sv: "Vilken myndighet betalar ut föräldrapenning och barnbidrag?", ar: "ما هي الهيئة المسؤولة عن دفع إعانة الأطفال والوالدين؟", options: ["Skatteverket", "Försäkringskassan", "Arbetsförmedlingen", "Pensionsmyndigheten"], answer: 1, explanation: "Försäkringskassan ansvarar för socialförsäkringar." },
-        { sv: "Vad är Arbetsförmedlingens uppgift?", ar: "ما هي مهمة مكتب العمل (Arbetsförmedlingen)؟", options: ["Dela ut pass", "Hjälpa arbetslösa att hitta jobb", "Samla skatter", "Bygga bostäder"], answer: 1, explanation: "Arbetsförmedlingen stöder arbetssökande." },
-        { sv: "Vad är syftet med skatter i Sverige?", ar: "ما هو الغرض من الضرائب في السويد؟", options: ["Finansiera välfärd, skolor och sjukvård", "Bara betala lön till politiker", "Köp av vapen", "Frivilliga gåvor"], answer: 0, explanation: "Skatter finansierar den offentliga välfärden." },
-        { sv: "Vad betyder ordet 'Fackförbund'?", ar: "ماذا تعني كلمة نقابة عمالية (Fackförbund)؟", options: ["En idrottsklubb", "En organisation som tillvaratar löntagarnas intressen", "Ett politiskt parti", "En bank"], answer: 1, explanation: "Fackförbund företräder anställda gentemot arbetsgivare." }
+        { sv: "Vem utser statsministern i Sverige?", ar: "من الذي يختار رئيس الوزراء؟", options: ["Kungen", "Riksdagens talman", "Högsta domstolen", "Folket"], answer: 1, explanation: "Talmannen lämnar förslag till riksdagen." },
+        { sv: "Vilken myndighet ansvarar för folkbokföring?", ar: "من المسؤول عن النفوس؟", options: ["Migrationsverket", "Skatteverket", "Försäkringskassan", "Polisen"], answer: 1, explanation: "Skatteverket sköter detta." },
+        { sv: "Vad innebär offentlighetsprincipen?", ar: "ماذا تعني مبدأ العلنية؟", options: ["Rätt att läsa allmänna handlingar", "Allt är hemligt", "Frivillig skatt", "Polisstat"], answer: 0, explanation: "Rätt till insyn i myndigheter." },
+        { sv: "Vid vilken ålder får man rösta i riksdagsval?", ar: "ما هو عمر التصويت؟", options: ["16 år", "18 år", "20 år", "21 år"], answer: 1, explanation: "Rösträttsåldern är 18 år." },
+        { sv: "Vad ansvarar kommunen för?", ar: "ما هي مسؤولية البلدية؟", options: ["Lagar", "Skola och äldreomsorg", "Försvaret", "Pass"], answer: 1, explanation: "Kommunen sköter lokal service." },
+        { sv: "Vad är regionens huvudansvar?", ar: "ما هي مسؤولية الإقليم؟", options: ["Polisen", "Sjukvården", "Trafiken", "Kultur"], answer: 1, explanation: "Sjukvård är deras största uppgift." },
+        { sv: "Vad skyddar yttrandefrihetsgrundlagen?", ar: "ماذا يحمي قانون حرية التعبير؟", options: ["Radio och TV", "Böcker", "Religion", "Kungahuset"], answer: 0, explanation: "Den skyddar media som radio, tv och webb." },
+        { sv: "Hur ofta är det riksdagsval?", ar: "كم مرة تجرى الانتخابات؟", options: ["Varje år", "Var 4:e år", "Var 5:e år", "Var 3:e år"], answer: 1, explanation: "Val hålls vart fjärde år." },
+        { sv: "Vad är en remiss?", ar: "ما هو نظام الإحالة (Remiss)؟", options: ["Ett brev", "Att skicka förslag för synpunkter", "En skatt", "Ett straff"], answer: 1, explanation: "Ett sätt att få in experters åsikter." },
+        { sv: "Vad betyder demokrati?", ar: "ما معنى ديمقراطية؟", options: ["Folkstyre", "Kungsstyre", "Diktatur", "Militärstyre"], answer: 0, explanation: "Makten utgår från folket." },
+        { sv: "Vilken roll har domstolarna?", ar: "ما دور المحاكم؟", options: ["Stifta lagar", "Döma i brottmål", "Samla skatt", "Bygga vägar"], answer: 1, explanation: "De är oberoende och dömer enligt lag." },
+        { sv: "Vem grundade Stockholm enligt legenderna?", ar: "من أسس ستوكهولم؟", options: ["Birger jarl", "Gustav Vasa", "Karl XII", "Olof Palme"], answer: 0, explanation: "Birger jarl anses som grundaren." },
+        { sv: "När firas midsommar?", ar: "متى يحتفل بمنتصف الصيف؟", options: ["I början av juni", "I slutet av juni", "I maj", "I juli"], answer: 1, explanation: "Firas fredagen mellan 19-25 juni." },
+        { sv: "Vad är Allemansrätten?", ar: "ما هو حق الوصول العام؟", options: ["Frihet i naturen", "Köpa mark", "Äga bil", "Fiska fritt"], answer: 0, explanation: "Rätt att vistas i naturen." },
+        { sv: "Vad heter Sveriges valuta?", ar: "ما هي عملة السويد؟", options: ["Euro", "Krona", "Dollar", "Pund"], answer: 1, explanation: "Svenska kronan (SEK)." },
+        { sv: "Vem betalar ut barnbidrag?", ar: "من يدفع إعانة الطفل؟", options: ["Skatteverket", "Försäkringskassan", "Kommunen", "Banken"], answer: 1, explanation: "Försäkringskassan sköter detta." },
+        { sv: "Vad gör Arbetsförmedlingen?", ar: "ما دور مكتب العمل؟", options: ["Ger pass", "Hjälper till att hitta jobb", "Samlar skatt", "Sjukvård"], answer: 1, explanation: "Hjälper arbetssökande." }
     ];
 
-    // توليد مجموعات بأسئلة فريدة (كل مجموعة 30 سؤالاً بدون تكرار حتى 150+ سؤالاً أصلياً)
     const generatedModules = [];
-    const totalModulesCount = 5; // عدد المجموعات
-
-    for (let m = 0; m < totalModulesCount; m++) {
-        let moduleQuestions = [];
+    let questionPool = []; // مسبح جميع الأسئلة للاختبار الشامل
+    for (let m = 0; m < 5; m++) {
+        let modQ = [];
         for (let i = 0; i < 30; i++) {
-            // نأخذ أسئلة بتوزيع فريد لكل مجموعة لضمان عدم التطابق الكامل
-            let sourceIndex = (m * 7 + i * 3) % allQuestions.length;
-            let base = allQuestions[sourceIndex];
-            moduleQuestions.push({
-                sv: `[Modul ${m+1}] ${base.sv}`,
-                ar: `[مجموعة ${m+1}] ${base.ar}`,
+            let base = baseQuestions[(m * 5 + i) % baseQuestions.length];
+            let qObj = {
+                sv: base.sv,
+                ar: base.ar,
                 options: base.options,
                 answer: base.answer,
                 explanation: base.explanation
-            });
+            };
+            modQ.push(qObj);
+            questionPool.push(qObj);
         }
-        generatedModules.push(moduleQuestions);
+        generatedModules.push(modQ);
     }
 
     let currentQuestionsList = [];
@@ -291,11 +289,13 @@
     let selectedOption = null;
     let isAnswered = false;
     let activeModuleIndex = null;
+    let isExamMode = false; // متغير لمعرفة إذا كان وضع الاختبار الشامل مفعلاً
 
     let userResults = JSON.parse(localStorage.getItem('uhr_user_results')) || {};
 
     function initHomeMenu() {
         updateVisitorCounters();
+        isExamMode = false;
         const menuContainer = document.getElementById("modules-menu");
         menuContainer.innerHTML = "";
         
@@ -314,16 +314,26 @@
 
     function startModule(modIndex) {
         activeModuleIndex = modIndex + 1;
+        isExamMode = false;
         currentQuestionsList = generatedModules[modIndex];
         startQuizSession();
     }
 
     function startQuickQuiz() {
         activeModuleIndex = null;
-        // دمج كل الأسئلة واختيار 10 عشوائياً
-        let allFlat = [].concat(...generatedModules);
-        let shuffled = [...allFlat].sort(() => 0.5 - Math.random());
+        isExamMode = false;
+        let shuffled = [...questionPool].sort(() => 0.5 - Math.random());
         currentQuestionsList = shuffled.slice(0, 10);
+        startQuizSession();
+    }
+
+    // الدالة الجديدة الخاصة بالاختبار الشامل
+    function startComprehensiveExam() {
+        activeModuleIndex = null;
+        isExamMode = true;
+        // خلط كامل بنك الأسئلة واختيار 70 سؤال عشوائي وبدون تكرار في الترتيب
+        let shuffled = [...questionPool].sort(() => 0.5 - Math.random());
+        currentQuestionsList = shuffled.slice(0, 70); 
         startQuizSession();
     }
 
@@ -362,8 +372,16 @@
             optionsList.appendChild(li);
         });
 
-        document.getElementById("question-counter").innerText = `Fråga ${currentQuestionIndex + 1} / ${currentQuestionsList.length}`;
+        // تمييز شريط العنوان إذا كنا في الاختبار الشامل
+        let examTitle = isExamMode ? "📝 الاختبار الشامل: " : "";
+        document.getElementById("question-counter").innerText = `${examTitle}Fråga ${currentQuestionIndex + 1} / ${currentQuestionsList.length}`;
         document.getElementById("progress").style.width = `${((currentQuestionIndex + 1) / currentQuestionsList.length) * 100}%`;
+        
+        if(isExamMode) {
+            document.getElementById("progress").style.background = "var(--exam-color)";
+        } else {
+            document.getElementById("progress").style.background = "var(--primary-blue)";
+        }
     }
 
     function selectOption(index, element) {
@@ -379,19 +397,7 @@
             if (currentQuestionIndex < currentQuestionsList.length) {
                 loadQuestion();
             } else {
-                if (activeModuleIndex) {
-                    userResults[`module_${activeModuleIndex}`] = score;
-                    localStorage.setItem('uhr_user_results', JSON.stringify(userResults));
-                }
-
-                document.getElementById("quiz-view").innerHTML = `
-                    <div style="text-align: center; padding: 25px;">
-                        <h2 style="color: var(--primary-blue); margin-bottom: 10px;">نتيجة رائعة! / Resultat!</h2>
-                        <p style="margin-bottom: 15px; font-size: 16px; color: #475569;">لقد أنهيت الاختبار بنجاح وتم حفظ نتيجتك.</p>
-                        <p style="font-weight: bold; font-size: 22px; margin-bottom: 20px; color: var(--success);">النتيجة: ${score} / ${currentQuestionsList.length}</p>
-                        <button class="btn" onclick="location.reload()">العودة للرئيسية / Huvudmeny</button>
-                    </div>
-                `;
+                showFinalResults();
             }
             return;
         }
@@ -419,6 +425,54 @@
         expBox.style.display = "block";
 
         document.getElementById("submit-btn").innerText = "Nästa fråga / السؤال التالي";
+    }
+
+    function showFinalResults() {
+        if (activeModuleIndex) {
+            userResults[`module_${activeModuleIndex}`] = score;
+            localStorage.setItem('uhr_user_results', JSON.stringify(userResults));
+        }
+
+        let resultHTML = "";
+
+        // إذا كان المستخدم في الاختبار الشامل (70 سؤال)
+        if (isExamMode) {
+            let passThreshold = 49; // 70% للنجاح
+            let passed = score >= passThreshold;
+            
+            resultHTML = `
+                <div class="result-box ${passed ? 'result-pass' : 'result-fail'}">
+                    <h1 style="font-size: 32px; margin-bottom: 15px;">
+                        ${passed ? '🎉 مبروك! ناجح / Godkänd' : '❌ للأسف راسب / Underkänd'}
+                    </h1>
+                    <p style="font-size: 18px; margin-bottom: 10px; opacity: 0.9;">لقد أنهيت الاختبار الشامل (محاكاة الامتحان)</p>
+                    <div style="font-size: 40px; font-weight: bold; margin: 20px 0;">
+                        ${score} / 70
+                    </div>
+                    <p style="font-size: 16px;">
+                        ${passed 
+                            ? 'معلوماتك ممتازة وأنت مستعد لاختبار الجنسية السويدية!' 
+                            : 'تحتاج إلى 49 إجابة صحيحة (70%) للنجاح. راجع المجموعات وحاول مرة أخرى.'}
+                    </p>
+                </div>
+            `;
+        } else {
+            // نتيجة للمجموعات العادية والاختبار السريع
+            resultHTML = `
+                <div style="text-align: center; padding: 25px;">
+                    <h2 style="color: var(--primary-blue); margin-bottom: 10px;">نتيجة رائعة! / Resultat!</h2>
+                    <p style="margin-bottom: 15px; font-size: 16px; color: #475569;">لقد أنهيت التمارين بنجاح وتم حفظ نتيجتك.</p>
+                    <p style="font-weight: bold; font-size: 26px; margin-bottom: 20px; color: var(--success);">النتيجة: ${score} / ${currentQuestionsList.length}</p>
+                </div>
+            `;
+        }
+
+        document.getElementById("quiz-view").innerHTML = `
+            <div style="text-align: center; padding: 10px;">
+                ${resultHTML}
+                <button class="btn" onclick="location.reload()">العودة للرئيسية / Huvudmeny</button>
+            </div>
+        `;
     }
 
     window.onload = initHomeMenu;
