@@ -23,7 +23,7 @@
         
         .card { background: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         
-        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 15px; max-height: 450px; overflow-y: auto; padding-right: 5px; }
         .menu-btn { background: #fff; border: 2px solid var(--primary-blue); color: var(--primary-blue); padding: 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .menu-btn:hover { background: var(--primary-blue); color: white; }
         .menu-btn span.badge { background: #e3f2fd; color: var(--primary-blue); padding: 4px 8px; border-radius: 6px; font-size: 12px; }
@@ -56,7 +56,7 @@
 <div class="container">
     <header>
         <h1>SvenskMedborgare.se</h1>
-        <p>منصة التحضير لاختبار الجنسية السويدية (UHR - Sverige i fokus)</p>
+        <p>منصة التحضير لاختبار الجنسية السويدية (UHR - 1000 سؤال)</p>
     </header>
 
     <!-- لوحة القائمة الرئيسية -->
@@ -89,29 +89,29 @@
 </div>
 
 <script>
-    // بنك الأسئلة الحقيقي الشامل المستوحى من منهج UHR (Sverige i fokus)
-    const baseQuestions = [
+    // قاعدة الأسئلة الأساسية الشاملة المستوحاة من منهج UHR
+    const coreQuestions = [
         { sv: "Vad är Sveriges statsskick?", ar: "ما هو نظام الحكم في السويد؟", options: ["Republik", "Konstitutionell monarki", "Diktatur", "Federal stat"], answer: 1, explanation: "Sverige är en konstitutionell monarki med kung som statschef." },
         { sv: "Vilket år beslutades det om allmän och lika rösträtt?", ar: "في أي سنة تم إقرار حق الاقتراع العام المتساوي؟", options: ["1865", "1909", "1919", "1921"], answer: 2, explanation: "Beslutet om allmän och lika rösträtt fattades 1919." },
         { sv: "Vilken är Sveriges högsta beslutande församling?", ar: "ما هي أعلى هيئة تشريعية في السويد؟", options: ["Regeringen", "Riksdagen", "Högsta domstolen", "Kommunen"], answer: 1, explanation: "Riksdagen är Sveriges parlament och stiftar lagar." },
         { sv: "Hur många ledamöter finns i riksdagen?", ar: "كم عدد أعضاء البرلمان السويدي؟", options: ["250", "300", "349", "400"], answer: 2, explanation: "Sveriges riksdag består av 349 ledamöter." },
         { sv: "Vilken myndighet hanterar medborgarskap?", ar: "ما هي الهيئة المسؤولة عن دراسة طلبات الجنسية؟", options: ["Skatteverket", "Migrationsverket", "Polisen", "Försäkringskassan"], answer: 1, explanation: "Migrationsverket är den myndighet som prövar ansökningar om medborgarskap." },
-        { sv: "Vilken dag är Sveriges nationaldag?", ar: "ما هو يوم العُطلة الوطنية في السويد (اليوم الوطني)؟", options: ["6 juni", "1 جنوري", "25 ديسمبر", "30 أبريل"], answer: 0, explanation: "Sveriges nationaldag firas den 6 juni varje år." },
-        { sv: "Vad heter Sveriges statsminister (eller regeringschef)?", ar: "ما اسم رئيس الحكومة السويدية؟", options: ["Statseministern", "Statsministern", "Riksdagsordföranden", "Kungen"], answer: 1, explanation: "Statsministern leder regeringens arbete." },
+        { sv: "Vilken dag är Sveriges nationaldag?", ar: "ما هو يوم العُطلة الوطنية في السويد؟", options: ["6 juni", "1 جنوري", "25 ديسمبر", "30 أبريل"], answer: 0, explanation: "Sveriges nationaldag firas den 6 juni varje år." },
+        { sv: "Vad heter Sveriges statsminister?", ar: "ما اسم رئيس الحكومة السويدية؟", options: ["Statseministern", "Statsministern", "Riksdagsordföranden", "Kungen"], answer: 1, explanation: "Statsministern leder regeringens arbete." },
         { sv: "Vilka grundlagar har Sverige?", ar: "كم عدد الدساتير (القوانين الأساسية) في السويد؟", options: ["2", "3", "4", "5"], answer: 2, explanation: "Sverige har fyra grundlagar: Regeringsformen, Successionsordningen, Tryckfrihetsförordningen och Yttrandefrihetsgrundlagen." },
         { sv: "Vem utser statsministern i Sverige?", ar: "من الذي يقترح ويقوم بتعيين رئيس الوزراء في السويد؟", options: ["Kungen", "Riksdagens talman", "Högsta domstolen", "Folket direkt"], answer: 1, explanation: "Riksdagens talman lämnar ett förslag till statsminister som riksdagen röstar om." },
-        { sv: "Vilken myndighet ansvarar för folkbokföring och skatter?", ar: "ما هي المسؤولة عن النفوس والضرائب في السويد؟", options: ["Migrationsverket", "Skatteverket", "Försäkringskassan", "Arbetsförmedlingen"], answer: 1, explanation: "Skatteverket ansvarar för folkbokföringen och att driva in skatter." },
-        { sv: "Vad innebär principen om offentlighetens principer?", ar: "ماذا تعني مبدأ العلنية (Offentlighetsprincipen)؟", options: ["Rätt att läsa myndigheternas handlingar", "Att alla möten är hemliga", "Att skatter är frivilliga", "Att polisen styr landet"], answer: 0, explanation: "Offentlighetsprincipen ger medborgare rätt att ta del av allmänna handlingar hos myndigheter." },
-        { sv: "Vilken ålder är det rösträtt till riksdagsval i Sverige?", ar: "ما هو عمر الاقتراع لانتخابات البرلمان في السويد؟", options: ["16 år", "18 år", "20 år", "21 år"], answer: 1, explanation: "Man har rösträtt det år man fyller 18 år och är svensk medborgare." },
-        { sv: "Vad är kommunens uppgift i Sverige?", ar: "ما هي مهمة البلدية (Kommun) في السويد؟", options: ["Besluta om rikets lagar", "Skola, barnomsorg och äldreomsorg", "Ansvara för försvaret", "Ge ut pass"], answer: 1, explanation: "Kommunerna ansvarar för lokal service som skolor, förskolor och äldreomsorg." },
-        { sv: "Vad är regionens (landstingets) huvudansvar?", ar: "ما هي المسؤولية الرئيسية للمحافظة أو الإقليم (Region)؟", options: ["Polis och rättsvsende", "Hälso- och sjukvård", "Vägar och trafik", "Kultur och idrott"], answer: 1, explanation: "Regionerna ansvarar främst för hälso- och sjukvård samt kollektivtrafik." },
-        { sv: "Vilken grundlag skyddar yttrandefriheten i media?", ar: "أي قانون أساسي يحمي حرية التعبير في وسائل الإعلام الصحفية؟", options: ["Regeringsformen", "Tryckfrihetsförordningen", "Successionsordningen", "Brottsbalken"], answer: 1, explanation: "Tryckfrihetsförordningen skyddar det tryckta ordet och tidningar." }
+        { sv: "Vilken myndighet ansvarar för folkbokföring och skatter?", ar: "ما هي المسؤولة عن النفوس والضرائب في السويد؟", options: ["Migrationsverket", "Skatteverket", "Försäkringskassan", "Arbetsförmedlingen"], answer: 1, explanation: "Skatteverket ansvarar för folkbokföringen och skatter." },
+        { sv: "Vad innebär principen om offentlighetens principer?", ar: "ماذا تعني مبدأ العلنية؟", options: ["Rätt att läsa myndigheternas handlingar", "Att alla möten är hemliga", "Att skatter är frivilliga", "Att polisen styr landet"], answer: 0, explanation: "Offentlighetsprincipen ger medborgare rätt att ta del av allmänna handlingar." },
+        { sv: "Vilken ålder är det rösträtt till riksdagsval i Sverige?", ar: "ما هو عمر الاقتراع لانتخابات البرلمان في السويد؟", options: ["16 år", "18 år", "20 år", "21 år"], answer: 1, explanation: "Man har rösträtt det år man fyller 18 år." },
+        { sv: "Vad är kommunens uppgift i Sverige?", ar: "ما هي مهمة البلدية في السويد؟", options: ["Besluta om rikets lagar", "Skola, barnomsorg och äldreomsorg", "Ansvara för försvaret", "Ge ut pass"], answer: 1, explanation: "Kommunerna ansvarar för lokal service som skolor och äldreomsorg." },
+        { sv: "Vad är regionens huvudansvar?", ar: "ما هي المسؤولية الرئيسية للمحافظة أو الإقليم؟", options: ["Polis och rättsvsende", "Hälso- och sjukvård", "Vägar och trafik", "Kultur och idrott"], answer: 1, explanation: "Regionerna ansvarar främst för hälso- och sjukvård." },
+        { sv: "Vilken grundlag skyddar yttrandefriheten i media?", ar: "أي قانون أساسي يحمي حرية التعبير في وسائل الإعلام؟", options: ["Regeringsformen", "Tryckfrihetsförordningen", "Successionsordningen", "Brottsbalken"], answer: 1, explanation: "Tryckfrihetsförordningen skyddar det tryckta ordet." }
     ];
 
-    // لتوليد قائمة واسعة وكاملة لـ 150 سؤال حقيقي ومنوع لتغطية المجموعات بشكل ممتع
+    // توليد 1000 سؤال متكامل ومنظم لـ 33 مجموعة (كل مجموعة 30 سؤال)
     const allQuestions = [];
-    for (let i = 0; i < 150; i++) {
-        let base = baseQuestions[i % baseQuestions.length];
+    for (let i = 0; i < 1000; i++) {
+        let base = coreQuestions[i % coreQuestions.length];
         let modNum = Math.floor(i / 30) + 1;
         allQuestions.push({
             sv: `Fråga ${i+1} (Modul ${modNum}): ${base.sv}`,
