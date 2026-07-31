@@ -15,13 +15,13 @@
             --danger: #dc3545;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
+        body { background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; padding: 20px; display: flex; flex-direction: column; min-height: 100vh; }
+        .container { max-width: 800px; margin: 0 auto; flex: 1; width: 100%; }
         header { text-align: center; margin-bottom: 20px; }
         header h1 { color: var(--primary-blue); font-size: 24px; margin-bottom: 5px; }
         header p { color: #666; font-size: 14px; }
         
-        /* تصميم شريط إحصائيات الزوار */
+        /* شريط إحصائيات الزوار */
         .visitors-counter {
             display: flex;
             justify-content: space-around;
@@ -69,6 +69,26 @@
         .progress-container { background: #e9ecef; border-radius: 10px; height: 10px; width: 100%; margin-bottom: 20px; overflow: hidden; }
         .progress-bar { background: var(--primary-blue); height: 100%; width: 0%; transition: width 0.3s; }
         .hidden { display: none; }
+
+        /* تصميم بصمة الشعار AJK */
+        footer {
+            text-align: center;
+            padding: 15px 0;
+            color: #666;
+            font-size: 13px;
+            margin-top: auto;
+            border-top: 1px solid #e1e1e1;
+        }
+        .ajk-badge {
+            display: inline-block;
+            background: var(--primary-blue);
+            color: var(--primary-yellow);
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -114,12 +134,17 @@
     </div>
 </div>
 
+<!-- تذييل الصفحة مع شعار بصمتك AJK -->
+<footer>
+    جميع الحقوق محفوظة © 2026 | تطوير وتصميم <span class="ajk-badge">AJK</span>
+</footer>
+
 <script>
     // تفعيل عداد الزوار التفاعلي
     function updateVisitorCounters() {
         let visits = localStorage.getItem('uhr_total_visits');
         if (!visits) {
-            visits = 1240; // رقم بداية واقعي
+            visits = 1240; 
         } else {
             visits = parseInt(visits);
             if (!sessionStorage.getItem('uhr_counted_session')) {
@@ -130,12 +155,10 @@
         }
         document.getElementById('total-visits').innerText = visits.toLocaleString();
 
-        // محاكاة حية لعدد المستخدمين المتواجدين حالياً بشكل طبيعي
-        let active = Math.floor(Math.random() * 8) + 11; // ما بين 11 إلى 18 مستخدم
+        let active = Math.floor(Math.random() * 8) + 11; 
         document.getElementById('active-users').innerText = active;
     }
 
-    // قاعدة الأسئلة الأساسية الشاملة المستوحاة من منهج UHR
     const coreQuestions = [
         { sv: "Vad är Sveriges statsskick?", ar: "ما هو نظام الحكم في السويد؟", options: ["Republik", "Konstitutionell monarki", "Diktatur", "Federal stat"], answer: 1, explanation: "Sverige är en konstitutionell monarki med kung som statschef." },
         { sv: "Vilket år beslutades det om allmän och lika rösträtt?", ar: "في أي سنة تم إقرار حق الاقتراع العام المتساوي؟", options: ["1865", "1909", "1919", "1921"], answer: 2, explanation: "Beslutet om allmän och lika rösträtt fattades 1919." },
@@ -154,7 +177,6 @@
         { sv: "Vilken grundlag skyddar yttrandefriheten i media?", ar: "أي قانون أساسي يحمي حرية التعبير في وسائل الإعلام؟", options: ["Regeringsformen", "Tryckfrihetsförordningen", "Successionsordningen", "Brottsbalken"], answer: 1, explanation: "Tryckfrihetsförordningen skyddar det tryckta ordet." }
     ];
 
-    // توليد 1000 سؤال متكامل ومنظم لـ 33 مجموعة (كل مجموعة 30 سؤال)
     const allQuestions = [];
     for (let i = 0; i < 1000; i++) {
         let base = coreQuestions[i % coreQuestions.length];
@@ -252,7 +274,6 @@
 
     function selectOption(index, element) {
         if (isAnswered) return;
-        document.querySelectorAll(".option-item").options = document.querySelectorAll(".option-item");
         document.querySelectorAll(".option-item").forEach(el => el.classList.remove("selected"));
         element.classList.add("selected");
         selectedOption = index;
